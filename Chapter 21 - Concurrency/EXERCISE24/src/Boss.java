@@ -2,8 +2,8 @@
  * Created by Chizhov-as on 07.07.2015.
  */
 public class Boss implements Runnable {
-    JobStack jobStack = new JobStack();
 
+    JobStack jobStack;
 
     public Boss(JobStack jobStack){
         this.jobStack = jobStack;
@@ -11,22 +11,26 @@ public class Boss implements Runnable {
 
     @Override
     public void run() {
-        for(int i=1;i<11;i++){
-            try {
-                while (!Thread.interrupted()){
-                    while (JobStack.jobFlag) {
-                        wait();
+    try {
+        while (!Thread.interrupted()) {
+            for(int i=1;i<11;i++){
+                synchronized (jobStack){
+                    while (JobStack.flagJobIsExist) {
+                        jobStack.wait();
                     }
-                    synchronized (jobStack){
-                        Job job = new Job(i);
-                        jobStack.setJob(job);
-                        JobStack.jobFlag = false;
-                        ;
-                    }
+                    Job job = new Job(i);
+                    jobStack.setJob(job);
+                    JobStack.flagJobIsExist = true;
+                    jobStack.notifyAll();
                 }
-            }catch (InterruptedException iEX){
-                iEX.printStackTrace();
             }
+            break;
         }
+    }
+    catch (InterruptedException iEX){
+        iEX.printStackTrace();
+    }
+    JobStack.isFlagJobIsDone = true;
+    System.out.println("Boss go home");
     }
 }

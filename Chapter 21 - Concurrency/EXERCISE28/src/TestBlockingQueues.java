@@ -1,9 +1,6 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.*;
 
 /**
  * Created by Chizhov-AS on 23.09.2015.
@@ -23,15 +20,16 @@ public class TestBlockingQueues {
     }
 
     static void test (String msg, BlockingQueue<LiftOff> queue){
-        System.out.println(msg);
-        LiftOffRunner runner = new LiftOffRunner(queue);
-        Thread t = new Thread(runner);
-        t.start();
-        for (int i=0; i<5;i++){
-            runner.add(new LiftOff());
-        }
-        getkey("Press 'Enter' (" + msg +")");
-        t.interrupt();
+
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        System.out.println(msg.toUpperCase());
+        System.out.println();
+        LiftOffRunner liftOffRunner = new LiftOffRunner(queue);
+        LiftOffManager liftOffManager = new LiftOffManager(liftOffRunner);
+        executorService.execute(liftOffRunner);
+        executorService.execute(liftOffManager);
+        getkey("Press 'ENTER' (" + msg + ")");
+        executorService.shutdown();
         System.out.println("Finished "+ msg + "test");
     }
 
@@ -43,7 +41,4 @@ public class TestBlockingQueues {
 
         test("SynchronousQueue", new SynchronousQueue<LiftOff>());
     }
-
-
-
 }

@@ -4,15 +4,14 @@ import java.util.concurrent.BlockingQueue;
  * Created by Chizhov-AS on 23.09.2015.
  */
 public class LiftOffRunner implements Runnable{
-    private BlockingQueue<LiftOff> rockets;
-
+    private BlockingQueue<LiftOff> blockingQueue;
     public LiftOffRunner(BlockingQueue<LiftOff> queue){
-        rockets = queue;
+        blockingQueue = queue;
     }
 
-    public void add(LiftOff lo){
+    public void add(LiftOff liftOff){
         try {
-            rockets.put(lo);
+            blockingQueue.put(liftOff);
         }catch (InterruptedException e){
             System.out.println("Interrupted during put()");
         }
@@ -21,8 +20,8 @@ public class LiftOffRunner implements Runnable{
     public void run(){
         try {
             while (!Thread.interrupted()){
-                LiftOff rocket = rockets.take();
-                rocket.run();
+                LiftOff liftOff = blockingQueue.take();
+                liftOff.run();
             }
         } catch (InterruptedException e){
             System.out.println("Waking from take()");
